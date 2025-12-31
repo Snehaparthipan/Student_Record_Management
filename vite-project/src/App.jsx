@@ -1,144 +1,92 @@
-import { useEffect, useState } from 'react'
-import axios from "axios"
-import API from "./Utills/API"
+import { useEffect, useState } from "react";
+import API from "./api";
 
 function App() {
+  const [students, setStudents] = useState([]);
   const [form, setForm] = useState({
-    name: "",
+    studentName: "",
     grade: "",
     subject: ""
-  })
-  const [data, setData] = useState([])
+  });
+  const [editId, setEditId] = useState(null);
 
-  const [refresh, setRefresh] = useState(false)
-
-  const [editid, setId] = useState("")
-  const [popup, setPopup] = useState(false)
+  const fetchStudents = async () => {
+    const res = await API.get("/students");
+    setStudents(res.data);
+  };
 
   useEffect(() => {
-    Getuser()
-  }, [refresh])
+    fetchStudents();
+  }, []);
 
-  function handlechange(e) {
-    setForm({
-      ...form, [e.target.name]: e.target.value
-    })
-  }
-  
-  async function Postuser() {
-    try {
-      const res = await API.post("/users", form)
-      alert("user send")
-      setForm({ name: "", grade: "", subject: ""})
-      setRefresh(!refresh)
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    if (editId) {
+      await API.put(`/students/${editId}`, form);
+      setEditId(null);
+    } else {
+      await API.post("/students", form);
     }
-    catch (error) {
-      console.log(error)
-    }
+    setForm({ studentName: "", grade: "", subject: "" });
+    fetchStudents();
+  };
 
-  }
-  async function Getuser() {
-    try {
-      const res = await API.get("/all")
-      setData(res.data.data)
-      console.log(res.data)
-    } catch (error) {
-      console.log(error)
-    }
-  }
-  async function Deleteuser(id) {
-    try {
-      const res = await API.delete(`/del/${id}`)
-      setRefresh(!refresh)
-      alert("user deleted")
-    } catch (error) {
-      console.log(error)
-    }
-  }
-  function handleedit(val) {
-    setForm({
-      name: val.name,
-      grade: val.grade,
-      subject: val.subject
-    })
-    setId(val._id)
-    setPopup(true)
-  }
-  async function Edituser() {
-    try {
-      const res = await API.put(`/new/${editid}`, form)
-      setForm({ name: "", grade: "", subject: "" })
-      setRefresh(!refresh)
-      setPopup(false)
-      
-    } catch (error) {
-      console.log(error)
-    }
+  const deleteStudent = async (id) => {
+    await API.delete(`/students/${id}`);
+    fetchStudents();
+  };
 
-  }
-  async function Canceluser(){
-    try {
-      setPopup(false)
-      setForm({ name: "", grade: "", subject: ""  })
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
+  const editStudent = (student) => {
+    setForm(student);
+    setEditId(student._id);
+  };
 
   return (
-    <>
-    <div className='div'>
-      <h1>Employee Form</h1>
-      <input type="text" name='name' value={form.name} placeholder='Enter Your Name' onChange={handlechange} />
-      <input type="text" name='grade' value={form.grade} placeholder='Enter Your EmailId' onChange={handlechange} />
-      <input type="text" name='subject' value={form.subject} placeholder='Enter Your Phone. No' onChange={handlechange} />
-      <button onClick={() => Postuser()}>Submit</button>
+    <div>
+      <h2>Student Record Management</h2>
 
-      <table  cellSpacing={0} cellPadding={20}>
-        <th>Name</th>
-        <th>grade</th>
-        <th>subject</th>
+      {/* Add / Update Student Form (2 Marks) */}
+      <form onSubmit={submitHandler}>
+        <input placeholder="Name" value={form.studentName}
+          onChange={e => setForm({ ...form, studentName: e.target.value })} />
 
-        <th colSpan={2}>Actions</th>
-        <th>time</th>
-        <th>Date</th>
+        <input placeholder="Grade" value={form.grade}
+          onChange={e => setForm({ ...form, grade: e.target.value })} />
 
-        {
-          data.map((val) => {
-            return <tr key={val._id} className='trow'>
-              <td>{val.name}</td>
-              <td>{val.grade}</td>
-              <td>{val.subject}</td>
-              <td><button onClick={() => handleedit(val)}>Edit</button></td>
-              <td><button onClick={() => Deleteuser(val._id)}>Delete</button></td>
-              <td>{new Date(val?.updatedAt).toLocaleTimeString()}</td>
-              <td>{new Date(val?.updatedAt).toDateString()}</td>
+        <input placeholder="Subject" value={form.subject}
+          onChange={e => setForm({ ...form, subject: e.target.value })} />
+
+        <button type="submit">
+          {editId ? "Update Student" : "Add Student"}
+        </button>
+      </form>
+
+      {/* Student List Display (2 Marks) */}
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Grade</th>
+            <th>Subject</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {students.map(s => (
+            <tr key={s._id}>
+              <td>{s.studentName}</td>
+              <td>{s.grade}</td>
+              <td>{s.subject}</td>
+              <td>
+                <button onClick={() => editStudent(s)}>Edit</button>
+                <button onClick={() => deleteStudent(s._id)}>Delete</button>
+              </td>
             </tr>
-
-          })
-        }
+          ))}
+        </tbody>
       </table>
-
-      {
-        popup && (
-          <div className="modal-overlay">
-            <div className="modal-box">
-              <h3>Edit User</h3>
-
-              <input type="text" name='name' value={form.name} placeholder='Enter Employee Name' onChange={handlechange} />
-              <input type="text" name='grade' value={form.grade} placeholder='Enter Employee Email' onChange={handlechange} />
-              <input type="text" name='subject' value={form.subject} placeholder='Enter Employee Name' onChange={handlechange} />
-              
-
-              <button onClick={() => Edituser()}>Edit</button>
-              <button onClick={() => Canceluser()}>cancel</button></div>
-          </div>
-        )
-      }
-      </div>
-    </>
-  )
+    </div>
+  );
 }
 
 export default App;

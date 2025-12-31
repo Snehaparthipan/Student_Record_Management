@@ -1,8 +1,8 @@
 const express=require("express")
-const {postUser,getuser,deleteuser,putUser}=require("../Controller/UserController")
+const{ PostStudent, GetStd, DeleteStd, UpdateStd }=require("../Controller/StudentController")
 const router=express.Router()
-router.post("/users",postUser)
-router.get("/all",getuser)
-router.delete("/del/:id",deleteuser)
-router.put("/new/:id",putUser)
+router.post("/users",PostStudent)
+router.get("/all",GetStd)
+router.delete("/del/:id",DeleteStd)
+router.put("/new/:id",UpdateStd)
 module.exports=router
