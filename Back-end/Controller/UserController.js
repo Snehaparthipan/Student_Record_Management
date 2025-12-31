@@ -1,21 +1,34 @@
 const user =require("../Model/User")
-const postUser = async(req,res)=>{
-    try{
-        const{name,grade,subject}=req.body
-        const newuser=new user({name,grade,subject})
-        await newuser.save()
-        res.status(200).json({message:"student created",data:newuser})
+
+const postUser = async (req, res) => {
+  try {
+    const { name, grade, subject } = req.body;
+
+    console.log("BODY:", req.body); // DEBUG
+
+    if (!name || !grade || !subject) {
+      return res.status(400).json({
+        message: "All fields are required"
+      });
     }
-    catch(error){
-        console.log(error)
-        res.status(500).json({message:"error in student creation"})
-    }
-    
-}
+
+    const newUser = await user.create({ name, grade, subject });
+
+    res.status(201).json({
+      message: "User created",
+      data: newUser
+    });
+  } catch (error) {
+    console.error("ERROR:", error.message);
+    res.status(500).json({
+      message: error.message
+    });
+  }
+};
 const getuser=async(req,res)=>{
     try{
         const getuser=await user.find()
-        res.status(200).json({message:"student get from DB",data:getuser})
+        res.status(200).json({message:"user get from DB",data:getuser})
     }
     catch(error){
         console.log(error)
