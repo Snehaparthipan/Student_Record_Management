@@ -1,4 +1,4 @@
-const user =require("../Model/User")
+const User =require("../Model/User")
 
 const postUser = async (req, res) => {
   try {
@@ -12,7 +12,7 @@ const postUser = async (req, res) => {
       });
     }
 
-    const newUser = await user.create({ name, grade, subject });
+    const newUser = await User.create({ name, grade, subject });
 
     res.status(201).json({
       message: "User created",
@@ -27,7 +27,7 @@ const postUser = async (req, res) => {
 };
 const getuser=async(req,res)=>{
     try{
-        const getuser=await user.find()
+        const getuser=await User.find()
         res.status(200).json({message:"user get from DB",data:getuser})
     }
     catch(error){
@@ -37,7 +37,7 @@ const getuser=async(req,res)=>{
 }
 const putUser=async(req,res)=>{
     try{
-        const putUser=await user.findByIdAndUpdate(req.params.id,
+        const putUser=await User.findByIdAndUpdate(req.params.id,
             req.body,
             {new:true}
         )
@@ -49,7 +49,7 @@ const putUser=async(req,res)=>{
 }
 const  deleteuser=async(req,res)=>{
     try{
-        const deleteuser=await user.findByIdAndDelete(req.params.id,
+        const deleteuser=await User.findByIdAndDelete(req.params.id,
             req.body,
             {new:true}
         )
