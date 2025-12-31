@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import axios from "axios"
-import API from "../src/Utills/API"
+import API from "./Utills/API"
 
 function App() {
   const [form, setForm] = useState({
